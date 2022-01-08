@@ -6,11 +6,11 @@ build:
 run:
 	./build/${BINARY_NAME}
 
-start: build run
+start: clean build run
 
 clean:
 	go clean
-	rm ./build
+	rm -rf ./build
 
 test:
 	go test ./...

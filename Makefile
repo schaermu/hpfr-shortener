@@ -1,7 +1,10 @@
 BINARY_NAME=hpfr-shortener
 
-build: GOARCH=amd64 GOOS=linux go build -o ./build/${BINARY_NAME} main.go
-run: ./build/${BINARY_NAME}
+build:
+	GOARCH=amd64 GOOS=linux go build -o ./build/${BINARY_NAME} main.go
+
+run:
+	./build/${BINARY_NAME}
 
 start: build run
 

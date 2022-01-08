@@ -1,9 +1,19 @@
-.PHONY: build
+BINARY_NAME=hpfr-shortener
 
-build:
-	go build -o ./bin/hpfr-shortener ./
+build: GOARCH=amd64 GOOS=linux go build -o ./build/${BINARY_NAME} main.go
+run: ./build/${BINARY_NAME}
 
-.PHONY: run
+start: build run
 
-run: build
-	./bin/hpfr-shortener
+clean:
+	go clean
+	rm ./build
+
+test:
+	go test ./...
+
+cover:
+	go test ./... -coverprofile=coverage.out
+
+docker:
+	docker build .

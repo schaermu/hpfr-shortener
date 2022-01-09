@@ -34,19 +34,8 @@ func main() {
 	}))
 
 	// routes
-	e.POST("/api/shorten", func(c echo.Context) (err error) {
-		url := new(URLShortenRequest)
-		if err = c.Bind(url); err != nil {
-			return
-		}
-
-		return c.JSON(http.StatusOK, url)
-	})
+	e.POST("/api/shorten", Shorten)
 
 	// start
 	e.Logger.Fatal(e.Start(":8080"))
-}
-
-type URLShortenRequest struct {
-	URL string `json:"url"`
 }

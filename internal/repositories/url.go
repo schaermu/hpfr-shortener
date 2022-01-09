@@ -32,7 +32,7 @@ func (r *URLRepository) FindByID(id string) (shortURL domain.ShortURL, err error
 }
 
 func (r *URLRepository) FindByShortCode(code string) (shortURL domain.ShortURL, err error) {
-	err = r.store.URLCollection.FindOne(context.TODO(), bson.M{"code": code}).Decode(&shortURL)
+	err = r.store.URLCollection.FindOne(context.TODO(), bson.M{"short_code": code}).Decode(&shortURL)
 	return
 }
 

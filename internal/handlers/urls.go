@@ -26,6 +26,7 @@ func NewURLHandler(e *echo.Echo, repository *repositories.URLRepository) {
 	}
 
 	e.POST("/api/shorten", handler.Shorten)
+	e.GET("/:code", handler.Redirect)
 }
 
 func (h *URLHandler) Shorten(c echo.Context) (err error) {
@@ -39,5 +40,14 @@ func (h *URLHandler) Shorten(c echo.Context) (err error) {
 		return
 	}
 
-	return c.JSON(http.StatusOK, &URLShortenResponse{ShortURL: fmt.Sprintf("https://hpfr.ch/%s", id)})
+	return c.JSON(http.StatusOK, &URLShortenResponse{ShortURL: fmt.Sprintf("%s://%s/%s", c.Scheme(), c.Request().Host, id)})
+}
+
+func (h *URLHandler) Redirect(c echo.Context) (err error) {
+	code := c.Param("code")
+	target, err := h.repository.FindByShortCode(code)
+	if err != nil {
+		return
+	}
+	return c.Redirect(302, target.TargetURL)
 }

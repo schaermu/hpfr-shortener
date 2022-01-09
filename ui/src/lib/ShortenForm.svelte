@@ -4,7 +4,7 @@
 
     let result = null
 
-    const { form, errors, touched, isValid, isModified, isSubmitting, handleChange, handleSubmit } = createForm({
+    const { form, errors, touched, isValid, isModified, isSubmitting, handleChange, handleSubmit, handleReset } = createForm({
         initialValues: {
             url: ''
         },
@@ -12,15 +12,20 @@
             url: yup.string().required().url()
         }),
         onSubmit: async values => {
-            return fetch('/api/shorten', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ url: values.url })
-            }).then((res) => {
-                res.json().then(json => result = json)
-            })
+            try {
+                const res = await fetch('/api/shorten', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: values.url })
+                }).then(res => res.json())
+                
+                result = res.short_url
+                handleReset()
+            } catch (err) {
+                console.error(err)
+            }
         }
     })
 </script>

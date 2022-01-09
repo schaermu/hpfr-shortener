@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -38,5 +39,5 @@ func (h *URLHandler) Shorten(c echo.Context) (err error) {
 		return
 	}
 
-	return c.JSON(http.StatusOK, id)
+	return c.JSON(http.StatusOK, &URLShortenResponse{ShortURL: fmt.Sprintf("https://hpfr.ch/%s", id)})
 }

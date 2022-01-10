@@ -59,7 +59,7 @@ func main() {
 	}))
 
 	// setup routes
-	handlers.NewURLHandler(e, urlRepo)
+	handlers.NewURLHandler(e, urlRepo, &config)
 
 	// start
 	e.Logger.Fatal(e.Start(":8080"))

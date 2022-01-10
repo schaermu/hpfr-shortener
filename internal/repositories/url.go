@@ -71,7 +71,7 @@ func (r *URLRepository) getUniqueID() (string, error) {
 			return "", err
 		}
 
-		res, err := r.FindByShortCode(id)
+		res, _ := r.FindByShortCode(id)
 		if res.ShortCode == "" {
 			found = id
 		}

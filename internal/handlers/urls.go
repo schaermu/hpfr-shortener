@@ -1,11 +1,11 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/schaermu/hpfr-shortener/internal/repositories"
+	"github.com/schaermu/hpfr-shortener/internal/utils"
 )
 
 type URLShortenRequest struct {
@@ -18,11 +18,13 @@ type URLShortenResponse struct {
 
 type URLHandler struct {
 	repository *repositories.URLRepository
+	config     *utils.Config
 }
 
-func NewURLHandler(e *echo.Echo, repository *repositories.URLRepository) {
+func NewURLHandler(e *echo.Echo, repository *repositories.URLRepository, config *utils.Config) {
 	handler := &URLHandler{
 		repository: repository,
+		config:     config,
 	}
 
 	e.POST("/api/shorten", handler.Shorten)
@@ -40,7 +42,8 @@ func (h *URLHandler) Shorten(c echo.Context) (err error) {
 		return
 	}
 
-	return c.JSON(http.StatusOK, &URLShortenResponse{ShortURL: fmt.Sprintf("%s://%s/%s", c.Scheme(), c.Request().Host, id)})
+	var shortURL = utils.GetShortLink(id, c, *h.config)
+	return c.JSON(http.StatusOK, &URLShortenResponse{ShortURL: shortURL})
 }
 
 func (h *URLHandler) Redirect(c echo.Context) (err error) {

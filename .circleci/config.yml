@@ -15,10 +15,12 @@ workflows:
               only: /v[0-9]+(\.[0-9]+)*(-.*)*/
 jobs:
   build_svelte:
+    working_directory: ~/repo/ui
     docker:
       - image: circleci/node:16.13
     steps:
-      - checkout
+      - checkout:
+        path: ~/repo
       - run:
           name: Update NPM
           command: "sudo npm install -g npm@8"
@@ -26,14 +28,14 @@ jobs:
           key: dependency-cache-{{ checksum "package-lock.json" }}
       - run:
           name: Install Dependencies
-          command: npm --prefix ui ci
+          command: npm ci
       - save_cache:
           key: dependency-cache-{{ checksum "package-lock.json" }}
           paths:
             - ./node_modules
       - run:
           name: Run tests
-          command: npm --prefix ui run test
+          command: npm run test
   build_go:
     docker:
       - image: circleci/golang:1.17

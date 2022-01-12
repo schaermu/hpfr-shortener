@@ -33,12 +33,22 @@
 <style>    
 .shorten-frm {
     display: grid;
-    grid-template-columns: 70% 30%;
-    gap: 0 2em;
+    grid-template-columns: 1fr 2fr;
+    gap: 2em 2em;
 }
+
+@media screen and (max-width: 768px) {
+    .shorten-frm {
+        grid-template-columns: 1fr;
+    }
+}
+
 </style>
 
 <div class="shorten-frm">
+    <div>
+        hpfr.ch is an URL shortener service. As of Jan 2022, it is completely open source and <a href="https://github.com/schaermu/hpfr-shortener" target="_blank">work in progress</a>.
+    </div>
     <div>
         <form on:submit={handleSubmit}>
             <input id="url" name="url" placeholder="URL to shorten"
@@ -48,8 +58,5 @@
             <button type="submit" disabled={!$isValid || !$isModified} aria-busy={$isSubmitting}>Shorten</button>
             <pre>{result}</pre>
         </form>
-    </div>
-    <div>
-        hpfr.ch is an URL shortener service. As of Jan 2022, it is completely open source and <a href="https://github.com/schaermu/hpfr-shortener" target="_blank">work in progress</a>.
     </div>
 </div>

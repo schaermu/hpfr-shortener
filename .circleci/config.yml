@@ -68,9 +68,6 @@ jobs:
       - store_test_results:
           path: /tmp/test-results
   release:
-    requires:
-      - build_svelte
-      - build_go
     docker:
       - image: circleci/golang:1.17
     steps:

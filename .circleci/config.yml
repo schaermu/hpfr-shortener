@@ -2,7 +2,8 @@ version: 2.1
 workflows:
   main:
     jobs:
-      - build
+      - build_svelte
+      - build_go
       - release:
           context:
             - github-release
@@ -13,7 +14,28 @@ workflows:
             tags:
               only: /v[0-9]+(\.[0-9]+)*(-.*)*/
 jobs:
-  build:
+  build_svelte:
+    working_directory: /tmp
+    docker:
+      - image: circleci/node:16.13
+    steps:
+      - checkout
+      - run:
+          name: Update NPM
+          command: "sudo npm install -g npm@8"
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+      - run:
+          name: Install Dependencies
+          command: npm --prefix ui ci
+      - save_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+          paths:
+            - ./node_modules
+      - run:
+          name: Run tests
+          command: npm --prefix ui run test
+  build_go:
     docker:
       - image: circleci/golang:1.17
     parallelism: 2
@@ -22,36 +44,33 @@ jobs:
     steps:
       - checkout
       - run: mkdir -p $TEST_RESULTS
-
       - restore_cache:
           keys:
             - go-mod-v4-{{ checksum "go.sum" }}
-
       - run:
           name: Install Dependencies
           command: go mod download
-
       - save_cache:
           key: go-mod-v4-{{ checksum "go.sum" }}
           paths:
             - "/go/pkg/mod"
-
       - run:
           name: Run tests
           command: |
-            PACKAGE_NAMES=$(go list ./... | circleci tests split --split-by=timings --timings-type=classname)
-            gotestsum --junitfile ${TEST_RESULTS}/gotestsum-report.xml -- -coverprofile=coverage.txt  -race -covermode=atomic -coverpkg=./... $PACKAGE_NAMES
+            PACKAGE_NAMES=$(go list -tags=test ./... | circleci tests split --split-by=timings --timings-type=classname)
+            gotestsum --junitfile ${TEST_RESULTS}/gotestsum-report.xml -- -tags=test -coverprofile=coverage.txt  -race -covermode=atomic -coverpkg=./... $PACKAGE_NAMES
       - run:
           name: Upload coverage to Codecov
           command: bash <(curl -s https://codecov.io/bash)
-
       - store_artifacts:
           path: /tmp/test-results
           destination: raw-test-output
-
       - store_test_results:
           path: /tmp/test-results
   release:
+    requires:
+      - build_svelte
+      - build_go
     docker:
       - image: circleci/golang:1.17
     steps:
@@ -59,4 +78,9 @@ jobs:
       - setup_remote_docker:
           version: 20.10.2
       - run: echo ${GITHUB_TOKEN} | docker login ghcr.io -u ${GITHUB_USERNAME} --password-stdin
-      - run: curl -sL https://git.io/goreleaser | bash
+      - run:
+          name: Build and publish docker image
+          command: |
+            make docker
+            docker push ghcr.io/schaermu/hpfr-shortener:latest
+            docker push ghcr.io/schaermu/hpfr-shortener:${CIRCLE_TAG}

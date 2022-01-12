@@ -2,9 +2,6 @@ package main
 
 import (
 	"context"
-	"embed"
-	"io/fs"
-	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -16,19 +13,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-//go:embed ui/dist
-var embeddedFiles embed.FS
-
 var log = logrus.New()
-
-func getFileSystem() http.FileSystem {
-	fsys, err := fs.Sub(embeddedFiles, "ui/dist")
-	if err != nil {
-		panic(err)
-	}
-
-	return http.FS(fsys)
-}
 
 func main() {
 	// read config

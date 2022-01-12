@@ -1,5 +1,4 @@
 /node_modules/
 /dist/
-!/dist/.gitkeep
 /.vscode/
 .DS_Store

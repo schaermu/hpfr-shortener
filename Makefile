@@ -13,10 +13,10 @@ clean:
 	rm -rf ./build
 
 test:
-	go test ./...
+	go test -tags=test ./...
 
 cover:
-	go test ./... -coverprofile=coverage.out
+	go test -tags=test ./... -coverprofile=coverage.out
 
 docker:
 	docker build .

@@ -20,12 +20,12 @@ WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
 
-# copy remainder (except ui) and compiled frontend from ui-builder
-COPY [^ui]* .
+# copy everything and compiled frontend from ui-builder
+COPY . ./
 COPY --from=ui-builder /src/dist ui/dist
 
 # build static binary to run on distroless/static
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -installsuffix 'static' -o /app main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -installsuffix 'static' -o /app .
 
 # Step 3: compile runtime image
 FROM gcr.io/distroless/static
@@ -34,5 +34,7 @@ LABEL maintainer="schaermu"
 
 USER nonroot:nonroot
 COPY --from=go-builder --chown=nonroot:nonroot /app /app
+
+EXPOSE 8080
 
 ENTRYPOINT ["/app"]

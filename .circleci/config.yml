@@ -79,6 +79,6 @@ jobs:
       - run:
           name: Build and publish docker image
           command: |
-            make docker
+            docker build -t ghcr.io/schaermu/hpfr-shortener:latest -t ghcr.io/schaermu/hpfr-shortener:${CIRCLE_TAG} .
             docker push ghcr.io/schaermu/hpfr-shortener:latest
             docker push ghcr.io/schaermu/hpfr-shortener:${CIRCLE_TAG}

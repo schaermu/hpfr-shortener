@@ -1,7 +1,17 @@
 package utils
 
+import "os"
+
 type Config struct {
-	MongoDSN string `mapstructure:"MONGO_DSN"`
-	MongoDB  string `mapstructure:"MONGO_DB"`
-	BaseURL  string `mapstructure:"BASE_URL"`
+	MongoDSN string
+	MongoDB  string
+	BaseURL  string
+}
+
+func NewConfigFromEnv() Config {
+	return Config{
+		MongoDSN: os.Getenv("MONGO_DSN"),
+		MongoDB:  os.Getenv("MONGO_DB"),
+		BaseURL:  os.Getenv("BASE_URL"),
+	}
 }

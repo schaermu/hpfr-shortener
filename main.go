@@ -10,22 +10,19 @@ import (
 	"github.com/schaermu/hpfr-shortener/internal/repositories"
 	"github.com/schaermu/hpfr-shortener/internal/utils"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
+
+	_ "github.com/joho/godotenv/autoload"
 )
 
 var log = logrus.New()
 
 func main() {
-	// read config
-	config, err := loadConfig(".")
-	if err != nil {
-		log.Fatal("cannot load config: ", err)
-	}
+	config := utils.NewConfigFromEnv()
 
 	// connect datastore, setup repositories
 	ds := data.NewDatastore(config.MongoDSN, config.MongoDB, log)
 	defer func() {
-		if err = ds.Session.Disconnect(context.Background()); err != nil {
+		if err := ds.Session.Disconnect(context.Background()); err != nil {
 			panic(err)
 		}
 	}()
@@ -48,19 +45,4 @@ func main() {
 
 	// start
 	e.Logger.Fatal(e.Start(":8080"))
-}
-
-func loadConfig(path string) (config utils.Config, err error) {
-	viper.AddConfigPath(path)
-	viper.SetConfigName("app")
-	viper.SetConfigType("env")
-	viper.AutomaticEnv()
-
-	err = viper.ReadInConfig()
-	if err != nil {
-		return
-	}
-
-	err = viper.Unmarshal(&config)
-	return
 }

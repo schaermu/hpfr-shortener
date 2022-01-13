@@ -1,5 +1,4 @@
 //go:build !test
-// +build !test
 
 package main
 
@@ -9,7 +8,7 @@ import (
 	"net/http"
 )
 
-//go:embed ui/dist
+//go:embed ui/dist/*
 var embeddedFiles embed.FS
 
 func getFileSystem() http.FileSystem {

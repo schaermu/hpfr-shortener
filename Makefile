@@ -17,6 +17,3 @@ test:
 
 cover:
 	go test -tags=test ./... -coverprofile=coverage.out
-
-docker:
-	docker build .

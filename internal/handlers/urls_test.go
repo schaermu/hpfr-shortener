@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 
@@ -29,8 +30,14 @@ type URLHandlerTestSuite struct {
 }
 
 func (suite *URLHandlerTestSuite) SetupSuite() {
+	// load config from env
+	mVersion := os.Getenv("MEMONGO_VERSION")
+	if mVersion == "" {
+		mVersion = "5.0.5"
+	}
+
 	// setup mongodb & repository
-	mongoServer, err := memongo.Start("5.0.5")
+	mongoServer, err := memongo.Start(mVersion)
 	if err != nil {
 		suite.T().Fatal(err)
 	}

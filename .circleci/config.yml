@@ -59,7 +59,7 @@ jobs:
           paths:
             - "/go/pkg/mod"
       - restore_cache:
-          key: memongo-{{ MEMONGO_VERSION }}
+          key: memongo-{{ .Environment.MEMONGO_VERSION }}
           paths:
             - $MEMONGO_CACHE_PATH
       - run:
@@ -68,7 +68,7 @@ jobs:
             PACKAGE_NAMES=$(go list -tags=test ./... | circleci tests split --split-by=timings --timings-type=classname)
             gotestsum --junitfile ${TEST_RESULTS}/gotestsum-report.xml -- -tags=test -coverprofile=coverage.txt  -race -covermode=atomic -coverpkg=./... $PACKAGE_NAMES
       - save_cache:
-          key: memongo-{{ MEMONGO_VERSION }}
+          key: memongo-{{ .Environment.MEMONGO_VERSION }}
           paths:
             - $MEMONGO_CACHE_PATH
       - run:

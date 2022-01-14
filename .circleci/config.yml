@@ -39,6 +39,7 @@ jobs:
   build_go:
     docker:
       - image: circleci/golang:1.17
+    paralellism: 2
     environment:
       TEST_RESULTS: /tmp/test-results
       MEMONGO_CACHE_PATH: /tmp/memongo

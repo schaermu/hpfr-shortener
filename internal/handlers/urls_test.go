@@ -63,15 +63,15 @@ func (suite *URLHandlerTestSuite) TestShorten() {
 
 func (suite *URLHandlerTestSuite) TestRedirect() {
 	for scenario, fn := range map[string]func(){
-		"empty id":        suite.testRedirectEmptyId,
-		"non-existent id": suite.testRedirectNonExistingId,
+		"empty id":        suite.testRedirectEmptyID,
+		"non-existent id": suite.testRedirectNonExistingID,
 		"found":           suite.testRedirectFound,
 	} {
 		suite.Run(scenario, fn)
 	}
 }
 
-func (suite *URLHandlerTestSuite) testRedirectEmptyId() {
+func (suite *URLHandlerTestSuite) testRedirectEmptyID() {
 	// arrange
 	var id = ""
 	rec := httptest.NewRecorder()
@@ -88,7 +88,7 @@ func (suite *URLHandlerTestSuite) testRedirectEmptyId() {
 	}
 }
 
-func (suite *URLHandlerTestSuite) testRedirectNonExistingId() {
+func (suite *URLHandlerTestSuite) testRedirectNonExistingID() {
 	// arrange
 	var id = "some_bogus_id"
 	rec := httptest.NewRecorder()

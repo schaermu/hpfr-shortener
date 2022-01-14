@@ -36,27 +36,6 @@ func (r *URLRepository) FindByShortCode(code string) (shortURL domain.ShortURL, 
 	return
 }
 
-func (r *URLRepository) GetAll() (shortURLs []domain.ShortURL, err error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	cur, err := r.store.URLCollection.Find(ctx, bson.D{})
-	defer cur.Close(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var res = []domain.ShortURL{}
-	for cur.Next(ctx) {
-		var result domain.ShortURL
-		if err := cur.Decode(&result); err != nil {
-			log.Fatal(err)
-		}
-		res = append(res, result)
-	}
-	return res, nil
-}
-
 func (r *URLRepository) NewShortURL(url string) (string, error) {
 	shortID, err := r.getUniqueID()
 	if err != nil {

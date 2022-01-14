@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 
+	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/schaermu/hpfr-shortener/internal/data"
@@ -39,6 +40,9 @@ func main() {
 		Filesystem: getFileSystem(),
 		HTML5:      true,
 	}))
+
+	// register custom validator
+	e.Validator = &utils.CustomValidator{Validator: validator.New()}
 
 	// setup routes
 	handlers.NewURLHandler(e, urlRepo, &config)

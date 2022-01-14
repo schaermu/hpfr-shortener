@@ -39,7 +39,6 @@ jobs:
   build_go:
     docker:
       - image: circleci/golang:1.17
-    parallelism: 2
     environment:
       TEST_RESULTS: /tmp/test-results
       MEMONGO_CACHE_PATH: /tmp/memongo
@@ -48,6 +47,7 @@ jobs:
       - checkout
       - run: mkdir -p $TEST_RESULTS
       - run: mkdir -p $MEMONGO_CACHE_PATH
+      - run: echo $MEMONGO_VERSION > /tmp/memongo-version
       - restore_cache:
           keys:
             - go-mod-v4-{{ checksum "go.sum" }}
@@ -59,18 +59,18 @@ jobs:
           paths:
             - "/go/pkg/mod"
       - restore_cache:
-          key: memongo-{{ .Environment.MEMONGO_VERSION }}
+          key: memongo-{{ checksum "/tmp/memongo-version" }}
           paths:
-            - $MEMONGO_CACHE_PATH
+            - {{ .Environment.MEMONGO_CACHE_PATH }}
       - run:
           name: Run tests
           command: |
             PACKAGE_NAMES=$(go list -tags=test ./... | circleci tests split --split-by=timings --timings-type=classname)
             gotestsum --junitfile ${TEST_RESULTS}/gotestsum-report.xml -- -tags=test -coverprofile=coverage.txt  -race -covermode=atomic -coverpkg=./... $PACKAGE_NAMES
       - save_cache:
-          key: memongo-{{ .Environment.MEMONGO_VERSION }}
+          key: memongo-{{ checksum "/tmp/memongo-version" }}
           paths:
-            - $MEMONGO_CACHE_PATH
+            - {{ .Environment.MEMONGO_CACHE_PATH }}
       - run:
           name: Upload coverage to Codecov
           command: bash <(curl -s https://codecov.io/bash)

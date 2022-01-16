@@ -39,7 +39,6 @@ jobs:
   build_go:
     docker:
       - image: circleci/golang:1.17
-    parallelism: 2
     environment:
       TEST_RESULTS: /tmp/test-results
       MEMONGO_VERSION: "5.0.5"
@@ -61,7 +60,7 @@ jobs:
             - "/go/pkg/mod"
       - restore_cache:
           name: Restore Memongo binary cache
-          key: memongo-bins-{{ checksum "/tmp/memongo-version" }}
+          key: memongo-bin-{{ checksum "/tmp/memongo-version" }}
           paths:
             - /tmp/memongo-cache
       - run:
@@ -69,11 +68,10 @@ jobs:
           environment:
             MEMONGO_CACHE_PATH: /tmp/memongo-cache
           command: |
-            PACKAGE_NAMES=$(go list -tags=test ./... | circleci tests split --split-by=timings --timings-type=classname)
-            MEMONGO_VERSION=$MEMONGO_VERSION gotestsum --junitfile ${TEST_RESULTS}/gotestsum-report.xml -- -tags=test -coverprofile=coverage.txt  -race -covermode=atomic -coverpkg=./... $PACKAGE_NAMES
+            MEMONGO_VERSION=$MEMONGO_VERSION gotestsum --junitfile ${TEST_RESULTS}/gotestsum-report.xml -- -tags=test -coverprofile=coverage.txt  -race -covermode=atomic ./...
       - save_cache:
           name: Save Memongo binary cache
-          key: memongo-bins-{{ checksum "/tmp/memongo-version" }}
+          key: memongo-bin-{{ checksum "/tmp/memongo-version" }}
           paths:
             - /tmp/memongo-cache
       - run:

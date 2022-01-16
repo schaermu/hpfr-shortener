@@ -12,12 +12,16 @@ start: clean build run
 
 clean:
 	go clean
+	go clean -testcache
 	rm -rf ./build
 
 test:
-	go test -tags=test ./...
+	gotestsum -f testname -- -tags=test ./...
+
+watch:
+	gotestsum --watch -f testname -- -tags=test ./...
 
 cover:
-	go test -tags=test ./... -coverprofile=coverage.out
+	gotestsum -f testname -- -tags=test ./... -coverprofile=coverage.out
 	$(GOCOVER) -func=coverage.out
 	$(GOCOVER) -html=coverage.out -o coverage.html

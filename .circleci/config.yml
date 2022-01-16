@@ -42,36 +42,40 @@ jobs:
     parallelism: 2
     environment:
       TEST_RESULTS: /tmp/test-results
-      MEMONGO_CACHE_PATH: /tmp/memongo
-      MEMONGO_VERSION: "5.0.5"
+      MEMONGO_VERSION: "5.0.5"s
     steps:
       - checkout
       - run: mkdir -p $TEST_RESULTS
-      - run: mkdir -p $MEMONGO_CACHE_PATH
       - run: echo $MEMONGO_VERSION > /tmp/memongo-version
       - restore_cache:
+          name: Restore Go module cache
           keys:
             - go-mod-v4-{{ checksum "go.sum" }}
       - run:
           name: Install Dependencies
           command: go mod download
       - save_cache:
+          name: Save Go module cache
           key: go-mod-v4-{{ checksum "go.sum" }}
           paths:
             - "/go/pkg/mod"
       - restore_cache:
+          name: Restore Memongo binary cache
           key: memongo-{{ checksum "/tmp/memongo-version" }}
           paths:
-            - /tmp/memongo
+            - /tmp/memongo-cache
       - run:
           name: Run tests
+          environment:
+            MEMONGO_CACHE_PATH: /tmp/memongo-cache
           command: |
             PACKAGE_NAMES=$(go list -tags=test ./... | circleci tests split --split-by=timings --timings-type=classname)
             gotestsum --junitfile ${TEST_RESULTS}/gotestsum-report.xml -- -tags=test -coverprofile=coverage.txt  -race -covermode=atomic -coverpkg=./... $PACKAGE_NAMES
       - save_cache:
+          name: Save Memongo binary cache
           key: memongo-{{ checksum "/tmp/memongo-version" }}
           paths:
-            - /tmp/memongo
+            - /tmp/memongo-cache
       - run:
           name: Upload coverage to Codecov
           command: bash <(curl -s https://codecov.io/bash)

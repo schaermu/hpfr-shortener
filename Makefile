@@ -19,7 +19,7 @@ test:
 	gotestsum -f testname -- -tags=test ./...
 
 watch:
-	gotestsum --watch -f testname -- -tags=test ./...
+	gotestsum --watch -f testname -- -tags=test ./... -coverprofile=coverage.out
 
 cover:
 	gotestsum -f testname -- -tags=test ./... -coverprofile=coverage.out

@@ -71,7 +71,7 @@ func (suite *URLHandlerTestSuite) TestShorten() {
 func (suite *URLHandlerTestSuite) TestRedirect() {
 	for scenario, fn := range map[string]func(){
 		"empty id":        suite.testRedirectEmptyID,
-		"non-existent id": suite.testRedirectNonExistingID,
+		"non existent id": suite.testRedirectNonExistingID,
 		"found":           suite.testRedirectFound,
 	} {
 		suite.Run(scenario, fn)

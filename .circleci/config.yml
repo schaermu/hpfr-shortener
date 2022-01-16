@@ -42,7 +42,7 @@ jobs:
     parallelism: 2
     environment:
       TEST_RESULTS: /tmp/test-results
-      MEMONGO_VERSION: "5.0.5"s
+      MEMONGO_VERSION: "5.0.5"
     steps:
       - checkout
       - run: mkdir -p $TEST_RESULTS

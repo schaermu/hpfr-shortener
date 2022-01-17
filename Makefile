@@ -16,10 +16,10 @@ clean:
 	rm -rf ./build
 
 test:
-	gotestsum -f testname -- -tags=test ./...
+	gotestsum -f testname -- -tags=test -coverprofile=coverage.txt -race -covermode=atomic ./...
 
 watch:
-	gotestsum --watch -f testname -- -tags=test ./... -coverprofile=coverage.out
+	gotestsum --watch -f testname -- -tags=test -coverprofile=coverage.txt -race -covermode=atomic ./...
 
 cover:
 	gotestsum -f testname -- -tags=test ./... -coverprofile=coverage.out

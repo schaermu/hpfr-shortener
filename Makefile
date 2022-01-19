@@ -19,7 +19,13 @@ test:
 	gotestsum -f testname -- -tags=test -coverprofile=coverage.txt -race -covermode=atomic ./...
 
 watch:
+	make -j2 watch-go watch-svelte
+
+watch-go:
 	gotestsum --watch -f testname -- -tags=test -coverprofile=coverage.txt -race -covermode=atomic ./...
+
+watch-svelte:
+	npm run --prefix ui test:watch
 
 cover:
 	gotestsum -f testname -- -tags=test ./... -coverprofile=coverage.out

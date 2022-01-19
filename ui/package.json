@@ -8,6 +8,7 @@
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "test": "jest --coverage src",
+    "test:cover": "jest --collectCoverage src",
     "test:watch": "npm run test -- --watch"
   },
   "devDependencies": {

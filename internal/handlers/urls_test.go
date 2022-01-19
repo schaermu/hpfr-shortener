@@ -41,7 +41,7 @@ func (suite *URLHandlerTestSuite) SetupSuite() {
 	if err != nil {
 		suite.T().Fatal(err)
 	}
-	store := data.NewDatastore(mongoServer.URI(), memongo.RandomDatabase(), logger)
+	store, err := data.NewDatastore(mongoServer.URI(), memongo.RandomDatabase(), logger)
 	suite.mongoServer = mongoServer
 	suite.repository = repositories.NewURLRepository(store)
 

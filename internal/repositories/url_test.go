@@ -37,7 +37,7 @@ func (suite *URLRepositoryTestSuite) SetupSuite() {
 		suite.T().Fatal(err)
 	}
 
-	suite.store = data.NewDatastore(mongoServer.URI(), memongo.RandomDatabase(), logger)
+	suite.store, err = data.NewDatastore(mongoServer.URI(), memongo.RandomDatabase(), logger)
 	suite.mongoServer = mongoServer
 }
 

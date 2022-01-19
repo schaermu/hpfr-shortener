@@ -20,7 +20,6 @@ footer {
   text-align: center;
   font-size: 0.9rem;
 }
-
 </style>
 
 <header class="container">

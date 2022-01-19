@@ -1,6 +1,7 @@
 <script lang="ts">
     import { createForm } from 'svelte-forms-lib'
     import * as yup from 'yup'
+    import { shortenUrl } from './api';
 
     let shortUrl = null
 
@@ -14,16 +15,12 @@
         }),
         onSubmit: async values => {
             try {
-                const res = await fetch('/api/shorten', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ url: values.url })
+                const res = await shortenUrl(values.url).then(async (res) => {
+                    await delay(1500)
+                    return res.json()
                 })
-                await delay(1500);
 
-                shortUrl = (await res.json()).short_url
+                shortUrl = res.short_url
                 handleReset()
             } catch (err) {
                 console.error(err)
@@ -33,12 +30,13 @@
 </script>
 
 <form on:submit={handleSubmit}>
-    <input id="url" name="url" placeholder="URL to shorten"
+    <input name="url" placeholder="URL to shorten" role="textbox" aria-label="url"
         on:keyup={handleChange}
         bind:value={$form.url}
         aria-invalid={!$touched.url ? null : $errors.url ? true : false}>
-    <button type="submit" disabled={!$isValid || !$isModified} aria-busy={$isSubmitting}>Shorten</button>
+    <button type="submit" aria-label="shorten" disabled={!$isValid || !$isModified} aria-busy={$isSubmitting}>Shorten</button>
 </form>
+<pre>{$isValid}</pre>
 <a href={shortUrl} target="_blank" aria-busy={$isSubmitting}>
     {#if $isSubmitting}
     Generating link, please wait...

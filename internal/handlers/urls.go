@@ -9,7 +9,7 @@ import (
 )
 
 type URLShortenRequest struct {
-	URL string `json:"url"`
+	URL string `json:"url" validate:"required,url"`
 }
 
 type URLShortenResponse struct {
@@ -21,7 +21,7 @@ type URLHandler struct {
 	config     *utils.Config
 }
 
-func NewURLHandler(e *echo.Echo, repository *repositories.URLRepository, config *utils.Config) {
+func NewURLHandler(e *echo.Echo, repository *repositories.URLRepository, config *utils.Config) *URLHandler {
 	handler := &URLHandler{
 		repository: repository,
 		config:     config,
@@ -29,12 +29,17 @@ func NewURLHandler(e *echo.Echo, repository *repositories.URLRepository, config 
 
 	e.POST("/api/shorten", handler.Shorten)
 	e.GET("/:code", handler.Redirect)
+	return handler
 }
 
 func (h *URLHandler) Shorten(c echo.Context) (err error) {
 	url := new(URLShortenRequest)
 	if err = c.Bind(url); err != nil {
-		return
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if err = c.Validate(url); err != nil {
+		return err
 	}
 
 	id, err := h.repository.NewShortURL(url.URL)
@@ -43,14 +48,14 @@ func (h *URLHandler) Shorten(c echo.Context) (err error) {
 	}
 
 	var shortURL = utils.GetShortLink(id, c, *h.config)
-	return c.JSON(http.StatusOK, &URLShortenResponse{ShortURL: shortURL})
+	return c.JSON(http.StatusCreated, &URLShortenResponse{ShortURL: shortURL})
 }
 
 func (h *URLHandler) Redirect(c echo.Context) (err error) {
 	code := c.Param("code")
 	target, err := h.repository.FindByShortCode(code)
 	if err != nil {
-		return
+		return echo.NewHTTPError(404)
 	}
 	return c.Redirect(302, target.TargetURL)
 }

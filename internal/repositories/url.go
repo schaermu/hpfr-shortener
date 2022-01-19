@@ -2,6 +2,8 @@ package repositories
 
 import (
 	"context"
+	"errors"
+	"net/url"
 	"time"
 
 	"github.com/labstack/gommon/log"
@@ -36,7 +38,15 @@ func (r *URLRepository) FindByShortCode(code string) (shortURL domain.ShortURL, 
 	return
 }
 
-func (r *URLRepository) NewShortURL(url string) (string, error) {
+func (r *URLRepository) NewShortURL(uri string) (string, error) {
+	if uri == "" {
+		return "", errors.New("url cannot be empty")
+	}
+
+	if u, err := url.Parse(uri); err != nil || (u.Scheme == "" || u.Host == "") {
+		return "", errors.New("url is invalid")
+	}
+
 	shortID, err := r.getUniqueID()
 	if err != nil {
 		return "", err
@@ -44,7 +54,7 @@ func (r *URLRepository) NewShortURL(url string) (string, error) {
 
 	shortURL := domain.ShortURL{
 		CreatedAt:     time.Now(),
-		TargetURL:     url,
+		TargetURL:     uri,
 		ShortCode:     shortID,
 		RedirectCount: 0,
 	}

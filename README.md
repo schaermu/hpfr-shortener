@@ -1,0 +1,2 @@
+[![CircleCI](https://circleci.com/gh/schaermu/hpfr-shortener/tree/main.svg?style=shield)](https://circleci.com/gh/schaermu/hpfr-shortener/tree/main)
+[![codecov](https://codecov.io/gh/schaermu/hpfr-shortener/branch/main/graph/badge.svg?token=QC1WL6JQTQ)](https://codecov.io/gh/schaermu/hpfr-shortener)

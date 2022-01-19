@@ -88,6 +88,9 @@ jobs:
           path: /tmp/test-results
   semgrep-scan:
     parameters:
+      repo_path:
+        type: string
+        default: schaermu/hpfr-shortener
       default_branch:
         type: string
         default: main

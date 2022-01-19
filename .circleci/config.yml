@@ -85,6 +85,22 @@ jobs:
           destination: raw-test-output
       - store_test_results:
           path: /tmp/test-results
+  semgrep-scan:
+    parameters:
+      default_branch:
+        type: string
+        default: main
+    environment:
+      SEMGREP_RULES: >-
+        p/ci
+      SEMGREP_BASELINE_REF: << parameters.default_branch >>
+    docker:
+      - image: returntocorp/semgrep-agent:v1
+    steps:
+      - checkout
+      - run:
+          name: "Semgrep scan"
+          command: semgrep-agent
   release:
     docker:
       - image: circleci/golang:1.17

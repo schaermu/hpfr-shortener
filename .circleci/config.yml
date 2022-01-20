@@ -4,7 +4,6 @@ workflows:
     jobs:
       - build-svelte
       - build-go
-      - semgrep-scan
       - release:
           context:
             - github-release

@@ -17,7 +17,7 @@
     "@testing-library/jest-dom": "5.16.1",
     "@testing-library/svelte": "3.0.3",
     "@testing-library/user-event": "13.5.0",
-    "@tsconfig/svelte": "2.0.1",
+    "@tsconfig/svelte": "3.0.0",
     "@types/jest": "27.4.0",
     "babel-jest": "27.4.6",
     "babel-plugin-transform-vite-meta-env": "1.0.3",

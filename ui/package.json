@@ -8,7 +8,7 @@
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "test": "jest --coverage src",
-    "test:cover": "jest --collectCoverage src",
+    "test:ci": "jest --ci --runInBand --reporters=default --reporters=jest-junit --collectCoverage src",
     "test:watch": "npm run test -- --watch"
   },
   "devDependencies": {
@@ -22,6 +22,7 @@
     "babel-jest": "^27.4.6",
     "babel-plugin-transform-vite-meta-env": "^1.0.3",
     "jest": "^27.4.7",
+    "jest-junit": "^13.0.0",
     "jest-transform-stub": "^2.0.0",
     "svelte": "^3.44.0",
     "svelte-check": "^2.2.7",

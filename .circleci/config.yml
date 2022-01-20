@@ -35,10 +35,16 @@ jobs:
             - ./node_modules
       - run:
           name: Run tests
-          command: npm run test
+          command: npm run test:ci
+          environment:
+            JEST_JUNIT_OUTPUT_DIR: ./reports/junit/
       - run:
           name: Upload coverage to Codecov
           command: bash <(curl -s https://codecov.io/bash)
+      - store_test_results:
+          path: ./reports/junit/
+      - store_artifacts:
+          path: ./reports/junit
   build-go:
     docker:
       - image: circleci/golang:1.17

@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/go-playground/validator"
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/schaermu/hpfr-shortener/internal/data"
 	"github.com/schaermu/hpfr-shortener/internal/repositories"

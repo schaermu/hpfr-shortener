@@ -1,7 +1,7 @@
 <script lang="ts">
     import { createForm } from 'svelte-forms-lib'
     import * as yup from 'yup'
-    import { shortenUrl } from './api';
+    import ApiClient from './api';
 
     let shortUrl = null
 
@@ -15,7 +15,7 @@
         }),
         onSubmit: async values => {
             try {
-                const res = await shortenUrl(values.url).then(async (res) => {
+                const res = await new ApiClient().shortenUrl(values.url).then(async (res) => {
                     await delay(1500)
                     return res.json()
                 })

@@ -1,5 +1,8 @@
-import { fireEvent, render, screen } from '@testing-library/svelte'
+import { render, screen } from '@testing-library/svelte'
+import userEvent from '@testing-library/user-event'
 import ShortenForm from './ShortenForm.svelte'
+
+jest.mock('./api')
 
 describe('ShortenForm', () => {
     test('it has an input field for the url', () => {
@@ -12,10 +15,10 @@ describe('ShortenForm', () => {
         render(ShortenForm);
 
         const inputField = screen.getByRole('textbox', { name: /url/i })
-        await fireEvent.change(inputField, { target: { value: testValue } });
+        userEvent.type(inputField, testValue);
         
         expect(inputField).toHaveValue(testValue)
-        expect(screen.getByText('Shorten')).toHaveAttribute('disabled')
+        expect(screen.getByRole('button', {name: /shorten/i})).toHaveAttribute('disabled')
     })
     
     test('it does accept valid input', async () => {
@@ -23,9 +26,9 @@ describe('ShortenForm', () => {
         render(ShortenForm);
 
         const inputField = screen.getByRole('textbox', { name: /url/i })
-        await fireEvent.change(inputField, { target: { value: testValue } });
+        await userEvent.type(inputField, testValue, { delay: 10 });
         
         expect(inputField).toHaveValue(testValue)
-        expect(screen.getByRole('button', {name: /shorten/i})).toHaveAttribute('disabled', '')
+        expect(screen.getByRole('button', {name: /shorten/i})).not.toHaveAttribute('disabled')
     })
 })

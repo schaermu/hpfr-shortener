@@ -13,5 +13,10 @@
   "testEnvironment": "jsdom",
   "setupFilesAfterEnv": [
     "@testing-library/jest-dom/extend-expect"
+  ],
+  "automock": false,
+  "resetMocks": false,
+  "setupFiles": [
+    "./setup.jest.js"
   ]
 }

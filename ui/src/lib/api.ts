@@ -17,18 +17,22 @@ export default class ApiClient {
             request.body = JSON.stringify(body)
         }
 
-        return fetch(url, request)
-            .then(response => {
-                // produce errors for certain http status codes
-                if ([400, 401, 403, 500].indexOf(response.status) > -1) {
-                    throw new Error(response.statusText)
-                }
-                return response.json() as Promise<T>
+        return new Promise((resolve, reject) => {
+            fetch(url, request)
+                .then(response => {
+                    response.json().then(body => {
+                        // produce errors for certain http status codes
+                        if ([400, 401, 403, 405, 500].indexOf(response.status) > -1) {
+                            reject(body.message);
+                        } else {
+                            resolve(body);
+                        }
+                    })
+                })
+                .catch((err) => {
+                    reject(err.message)
+                })
             })
-            .catch((err) => {
-                return err
-            })
-            
     }
 
     public async shortenUrl(url: string) : Promise<{ short_url: string }> {

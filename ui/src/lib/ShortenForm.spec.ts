@@ -58,7 +58,7 @@ describe('ShortenForm', () => {
     })
 
     test('it renders backend errors on the page', async () => {
-        ApiClient.prototype.shortenUrl = jest.fn().mockRejectedValueOnce(new Error('Internal Server Error'));
+        ApiClient.prototype.shortenUrl = jest.fn().mockRejectedValueOnce('invalid input data');
 
         const testValue = 'http://www.foobar.org'
         render(ShortenForm);
@@ -70,7 +70,7 @@ describe('ShortenForm', () => {
         button.click()
 
         await waitFor(() => {
-            expect(screen.getByText('Internal Server Error')).toBeInTheDocument()
+            expect(screen.getByText('invalid input data')).toBeInTheDocument()
         })
     })
 })

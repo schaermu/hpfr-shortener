@@ -19,17 +19,14 @@ describe('ApiClient', () => {
         const mockRes = new Error('request timeout')
         fetchMock.mockRejectedValue(mockRes)
 
-        const res = await new ApiClient().shortenUrl('http://foobar.org')
-
-        expect(res).toEqual(mockRes)
+        await expect(new ApiClient().shortenUrl('http://foobar.org')).rejects.toEqual(mockRes.message)
     })
 
     test('it does return an error object on certain error status codes', async () => {
-        const mockRes = new Error('Internal Server Error')
-        fetchMock.mockResponseOnce('', { status: 500 });
+        const mockRes = { message: 'validation error' }
+        fetchMock.mockResponseOnce(JSON.stringify(mockRes), { status: 400 });
 
-        const res = await new ApiClient().shortenUrl('http://foobar.org')
-
-        expect(res).toEqual(mockRes)
+        expect.assertions(1)
+        await expect(new ApiClient().shortenUrl('http://foobar.org')).rejects.toEqual(mockRes.message)
     })
 })

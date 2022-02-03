@@ -25,11 +25,17 @@
                 shortUrl = res.short_url
                 handleReset()
             } catch (err) {
-                error = err.message
+                error = err
             }
         }
     })
 </script>
+
+<style>
+    div[role=alert] {
+        color: #d63b3b;
+    }
+</style>
 
 <form on:submit={handleSubmit}>
     <input name="url" placeholder="URL to shorten" role="textbox" aria-label="url"
@@ -38,7 +44,9 @@
         aria-invalid={!$touched.url ? null : $errors.url ? true : false}>
     <button type="submit" aria-label="shorten" disabled={!$isValid || !$isModified} aria-busy={$isSubmitting}>Shorten</button>
 </form>
-<small>{error}</small>
+{#if error}
+<div role="alert" aria-label="error message">{error}</div>
+{/if}
 <a href={shortUrl} target="_blank" aria-busy={$isSubmitting}>
     {#if $isSubmitting}
     Generating link, please wait...

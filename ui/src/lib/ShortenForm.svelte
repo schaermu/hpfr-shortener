@@ -5,6 +5,7 @@
     import { delayFor } from './utils'
 
     let shortUrl = null
+    let error = null
     const client = new ApiClient();
 
     const { form, errors, touched, isValid, isModified, isSubmitting, handleChange, handleSubmit, handleReset } = createForm({
@@ -24,7 +25,7 @@
                 shortUrl = res.short_url
                 handleReset()
             } catch (err) {
-                console.error(err)
+                error = err.message
             }
         }
     })
@@ -37,7 +38,7 @@
         aria-invalid={!$touched.url ? null : $errors.url ? true : false}>
     <button type="submit" aria-label="shorten" disabled={!$isValid || !$isModified} aria-busy={$isSubmitting}>Shorten</button>
 </form>
-<pre>{$isValid}</pre>
+<small>{error}</small>
 <a href={shortUrl} target="_blank" aria-busy={$isSubmitting}>
     {#if $isSubmitting}
     Generating link, please wait...

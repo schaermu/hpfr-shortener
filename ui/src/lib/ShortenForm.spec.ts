@@ -6,6 +6,7 @@ jest.mock('./api')
 jest.mock('./utils')
 
 import ShortenForm from './ShortenForm.svelte'
+import { MOCK_SHORT_URL } from './__mocks__/api';
 
 describe('ShortenForm', () => {
     const MockedApiClient = jest.mocked(ApiClient, true);
@@ -51,9 +52,25 @@ describe('ShortenForm', () => {
         await userEvent.type(inputField, testValue, { delay: 10 })
         button.click()
 
+        await waitFor(() => {
+            expect(screen.getByText(MOCK_SHORT_URL)).toBeInTheDocument()
+        })
+    })
+
+    test('it renders backend errors on the page', async () => {
+        ApiClient.prototype.shortenUrl = jest.fn().mockRejectedValueOnce(new Error('Internal Server Error'));
+
+        const testValue = 'http://www.foobar.org'
+        render(ShortenForm);
+
+        const inputField = screen.getByRole('textbox', { name: /url/i })
+        const button = screen.getByRole('button', {name: /shorten/i})
+
+        await userEvent.type(inputField, testValue, { delay: 10 })
+        button.click()
 
         await waitFor(() => {
-            expect(screen.getByText('http://hpfr.ch/foo_bar_code')).toBeInTheDocument()
+            expect(screen.getByText('Internal Server Error')).toBeInTheDocument()
         })
     })
 })

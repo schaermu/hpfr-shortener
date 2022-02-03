@@ -6,12 +6,11 @@ describe('ApiClient', () => {
         fetchMock.resetMocks();
     })
 
-    test('it does return a fetch promise', async () => {
+    test('it does return a json object', async () => {
         const mockRes = { short_url: 'https://hpfr.ch/Gk9Fj9' }
         fetchMock.mockResponseOnce(JSON.stringify(mockRes))
 
-        const res = await new ApiClient().shortenUrl('http://foobar.org')
-        const json = await res.json()
+        const json = await new ApiClient().shortenUrl('http://foobar.org')
 
         expect(json).toEqual(mockRes)
     })

@@ -2,10 +2,11 @@
     import { createForm } from 'svelte-forms-lib'
     import * as yup from 'yup'
     import ApiClient from './api';
+    import { delayFor } from './utils'
 
     let shortUrl = null
+    const client = new ApiClient();
 
-    const delay = (ms: number) => new Promise(r => setTimeout(r, ms));
     const { form, errors, touched, isValid, isModified, isSubmitting, handleChange, handleSubmit, handleReset } = createForm({
         initialValues: {
             url: ''
@@ -15,9 +16,9 @@
         }),
         onSubmit: async values => {
             try {
-                const res = await new ApiClient().shortenUrl(values.url).then(async (res) => {
-                    await delay(1500)
-                    return res.json()
+                const res = await client.shortenUrl(values.url).then(async (res) => {
+                    await delayFor(1500)
+                    return res
                 })
 
                 shortUrl = res.short_url

@@ -23,6 +23,8 @@ type ShortURLHit struct {
 	OSMajor      string    `bson:"os_major,omitempty"`
 	OSMinor      string    `bson:"os_minor,omitempty"`
 	DeviceFamily string    `bson:"device_family,omitempty"`
+	DeviceModel  string    `bson:"device_model,omitempty"`
+	DeviceBrand  string    `bson:"device_brand,omitempty"`
 	Country      string    `bson:"country,omitempty"`
 	CountryCode  string    `bson:"country_code,omitempty"`
 }

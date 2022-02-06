@@ -17,6 +17,10 @@ type URLShortenResponse struct {
 	ShortURL string `json:"short_url"`
 }
 
+type URLStatisticsResponse struct {
+	HitCount int `json:"hits"`
+}
+
 type URLHandler struct {
 	repository *repositories.URLRepository
 	config     *utils.Config
@@ -31,6 +35,7 @@ func NewURLHandler(e *echo.Echo, repository *repositories.URLRepository, config 
 	}
 
 	e.POST("/api/shorten", handler.Shorten)
+	e.GET("/api/statistics", handler.Statistics)
 	e.GET("/:code", handler.Redirect)
 	return handler
 }
@@ -65,7 +70,7 @@ func (h *URLHandler) Redirect(c echo.Context) (err error) {
 
 	// requests to statistics are handled here
 	if strings.HasSuffix(code, "+") {
-		return h.Statistics(c)
+		return h.RenderStatistics(c)
 	}
 
 	defer h.repository.RecordHit(target, c)
@@ -73,11 +78,17 @@ func (h *URLHandler) Redirect(c echo.Context) (err error) {
 	return c.Redirect(http.StatusTemporaryRedirect, target.TargetURL)
 }
 
-func (h *URLHandler) Statistics(c echo.Context) (err error) {
+func (h *URLHandler) RenderStatistics(c echo.Context) (err error) {
 	f, err := StaticFS.Open("index.html")
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error serving stats")
 	}
 
 	return c.Stream(http.StatusFound, "text/html", f)
+}
+
+func (h *URLHandler) Statistics(c echo.Context) (err error) {
+	//code := c.QueryParam("code")
+
+	return c.JSON(http.StatusFound, &URLStatisticsResponse{})
 }

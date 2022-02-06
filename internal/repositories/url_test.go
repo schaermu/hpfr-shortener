@@ -57,8 +57,9 @@ func TestURLRepositoryTestSuite(t *testing.T) {
 
 func (suite *URLRepositoryTestSuite) TestFindByID() {
 	for scenario, fn := range map[string]func(){
-		"no id":    suite.testFindByID_NoID,
-		"valid id": suite.testFindByID_ValidID,
+		"no id":        suite.testFindByID_NoID,
+		"valid id":     suite.testFindByID_ValidID,
+		"with options": suite.testFindByID_WithOptions,
 	} {
 		suite.SetupTest()
 		suite.Run(scenario, fn)
@@ -67,8 +68,9 @@ func (suite *URLRepositoryTestSuite) TestFindByID() {
 
 func (suite *URLRepositoryTestSuite) TestFindByShortCode() {
 	for scenario, fn := range map[string]func(){
-		"no code":    suite.testFindByShortCode_NoCode,
-		"valid code": suite.testFindByShortCode_ValidCode,
+		"no code":      suite.testFindByShortCode_NoCode,
+		"valid code":   suite.testFindByShortCode_ValidCode,
+		"with options": suite.testFindByShortCode_WithOptions,
 	} {
 		suite.SetupTest()
 		suite.Run(scenario, fn)
@@ -123,6 +125,33 @@ func (suite *URLRepositoryTestSuite) testFindByID_ValidID() {
 	}
 }
 
+func (suite *URLRepositoryTestSuite) testFindByID_WithOptions() {
+	// arrange
+	var (
+		url  = "http://www.foobar.org"
+		code = "foobar"
+	)
+
+	var shortURL = domain.ShortURL{
+		CreatedAt: time.Now(),
+		TargetURL: url,
+		ShortCode: code,
+		Hits:      []domain.ShortURLHit{{UAFamily: "TestRunner", UAMajor: "1"}},
+	}
+	res, err := suite.store.URLCollection.InsertOne(context.TODO(), shortURL)
+	var insertedID = res.InsertedID.(primitive.ObjectID).Hex()
+
+	// act
+	foundShortURL, err := suite.repo.FindByIDWithOptions(insertedID, &FindOptions{IncludeHits: true})
+
+	// assert
+	if assert.NoError(suite.T(), err) {
+		assert.Equal(suite.T(), insertedID, foundShortURL.ID.Hex())
+		assert.Equal(suite.T(), 1, len(foundShortURL.Hits))
+		assert.Equal(suite.T(), "TestRunner", foundShortURL.Hits[0].UAFamily)
+	}
+}
+
 func (suite *URLRepositoryTestSuite) testFindByShortCode_NoCode() {
 	// arrange
 	var code = ""
@@ -158,6 +187,33 @@ func (suite *URLRepositoryTestSuite) testFindByShortCode_ValidCode() {
 		assert.Equal(suite.T(), insertedID, foundShortURL.ID.Hex())
 		assert.Equal(suite.T(), url, foundShortURL.TargetURL)
 		assert.Equal(suite.T(), code, foundShortURL.ShortCode)
+	}
+}
+
+func (suite *URLRepositoryTestSuite) testFindByShortCode_WithOptions() {
+	// arrange
+	var (
+		url  = "http://www.foobar.org"
+		code = "foobar"
+	)
+
+	var shortURL = domain.ShortURL{
+		CreatedAt: time.Now(),
+		TargetURL: url,
+		ShortCode: code,
+		Hits:      []domain.ShortURLHit{{UAFamily: "TestRunner", UAMajor: "1"}},
+	}
+	res, err := suite.store.URLCollection.InsertOne(context.TODO(), shortURL)
+	var insertedID = res.InsertedID.(primitive.ObjectID).Hex()
+
+	// act
+	foundShortURL, err := suite.repo.FindByShortCodeWithOptions(code, &FindOptions{IncludeHits: true})
+
+	// assert
+	if assert.NoError(suite.T(), err) {
+		assert.Equal(suite.T(), insertedID, foundShortURL.ID.Hex())
+		assert.Equal(suite.T(), 1, len(foundShortURL.Hits))
+		assert.Equal(suite.T(), "TestRunner", foundShortURL.Hits[0].UAFamily)
 	}
 }
 

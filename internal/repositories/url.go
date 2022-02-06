@@ -8,20 +8,25 @@ import (
 
 	ip2location "github.com/ip2location/ip2location-go"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/gommon/log"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/schaermu/hpfr-shortener/internal/data"
 	"github.com/schaermu/hpfr-shortener/internal/domain"
+	"github.com/schaermu/hpfr-shortener/internal/utils"
 	"github.com/sirupsen/logrus"
 	"github.com/ua-parser/uap-go/uaparser"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type URLRepository struct {
 	store    *data.MongoDatastore
 	ip2locDB *ip2location.DB
 	logger   *logrus.Logger
+}
+
+type FindOptions struct {
+	IncludeHits bool
 }
 
 func NewURLRepository(store *data.MongoDatastore, logger *logrus.Logger) *URLRepository {
@@ -39,16 +44,28 @@ func NewURLRepository(store *data.MongoDatastore, logger *logrus.Logger) *URLRep
 }
 
 func (r *URLRepository) FindByID(id string) (shortURL domain.ShortURL, err error) {
+	return r.FindByIDWithOptions(id, &FindOptions{})
+}
+
+func (r *URLRepository) FindByIDWithOptions(id string, opts *FindOptions) (shortURL domain.ShortURL, err error) {
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return
 	}
-	err = r.store.URLCollection.FindOne(context.TODO(), bson.M{"_id": bson.M{"$eq": objID}}).Decode(&shortURL)
+	err = r.store.URLCollection.FindOne(context.TODO(),
+		bson.M{"_id": bson.M{"$eq": objID}},
+		options.FindOne().SetProjection(bson.M{"hits": utils.BTOI(opts.IncludeHits)})).Decode(&shortURL)
 	return
 }
 
 func (r *URLRepository) FindByShortCode(code string) (shortURL domain.ShortURL, err error) {
-	err = r.store.URLCollection.FindOne(context.TODO(), bson.M{"short_code": code}).Decode(&shortURL)
+	return r.FindByShortCodeWithOptions(code, &FindOptions{})
+}
+
+func (r *URLRepository) FindByShortCodeWithOptions(code string, opts *FindOptions) (shortURL domain.ShortURL, err error) {
+	err = r.store.URLCollection.FindOne(context.TODO(),
+		bson.M{"short_code": code},
+		options.FindOne().SetProjection(bson.M{"hits": utils.BTOI(opts.IncludeHits)})).Decode(&shortURL)
 	return
 }
 
@@ -83,7 +100,7 @@ func (r *URLRepository) NewShortURL(uri string) (string, error) {
 		return "", err
 	}
 
-	log.Infof("Created new short url with code %v", shortURL.ShortCode)
+	r.logger.Infof("Created new short url with code %v", shortURL.ShortCode)
 	return shortURL.ShortCode, nil
 }
 
@@ -94,13 +111,16 @@ func (r *URLRepository) RecordHit(target domain.ShortURL, c echo.Context) error 
 	uap := parser.Parse(c.Request().UserAgent())
 
 	hit := domain.ShortURLHit{
-		CreatedAt: time.Now(),
-		UAFamily:  uap.UserAgent.Family,
-		UAMajor:   uap.UserAgent.Major,
-		UAMinor:   uap.UserAgent.Minor,
-		OS:        uap.Os.Family,
-		OSMajor:   uap.Os.Major,
-		OSMinor:   uap.Os.Minor,
+		CreatedAt:    time.Now(),
+		UAFamily:     uap.UserAgent.Family,
+		UAMajor:      uap.UserAgent.Major,
+		UAMinor:      uap.UserAgent.Minor,
+		OS:           uap.Os.Family,
+		OSMajor:      uap.Os.Major,
+		OSMinor:      uap.Os.Minor,
+		DeviceFamily: uap.Device.Family,
+		DeviceModel:  uap.Device.Model,
+		DeviceBrand:  uap.Device.Brand,
 	}
 
 	// try to locate ip address

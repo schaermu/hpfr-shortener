@@ -125,7 +125,30 @@ func (suite *URLHandlerTestSuite) testRedirectFound() {
 
 	// assert
 	if assert.NoError(suite.T(), err) {
+		assert.Equal(suite.T(), http.StatusTemporaryRedirect, rec.Code)
+	}
+}
+
+func (suite *URLHandlerTestSuite) testStatisticsFound() {
+	// arrange
+	id, repoErr := suite.repository.NewShortURL("http://foobar.org")
+	if repoErr != nil {
+		suite.T().Fatal(repoErr)
+	}
+	rec := httptest.NewRecorder()
+	c, h := suite.prepareRedirectTest(id+"+", rec)
+
+	// act
+	err := h.Redirect(c)
+
+	// assert
+	if assert.NoError(suite.T(), err) {
 		assert.Equal(suite.T(), http.StatusFound, rec.Code)
+
+		if rec.Body.String() != "<html></html>" {
+			suite.T().Errorf("handler returned unexpected body: got %v want %v",
+				rec.Body.String(), "<html></html>")
+		}
 	}
 }
 

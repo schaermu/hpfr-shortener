@@ -1,12 +1,12 @@
 import { render, screen, waitFor } from '@testing-library/svelte'
 import userEvent from '@testing-library/user-event'
-import ApiClient from './api';
+import ApiClient from 'src/lib/api';
 
-jest.mock('./api')
-jest.mock('./utils')
+jest.mock('src/lib/api')
+jest.mock('src/lib/utils')
 
 import ShortenForm from './ShortenForm.svelte'
-import { MOCK_SHORT_URL } from './__mocks__/api';
+import { MOCK_SHORT_URL } from 'src/lib/__mocks__/api';
 
 describe('ShortenForm', () => {
     const MockedApiClient = jest.mocked(ApiClient, true);

@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "svelte-forms-lib": "2.0.1",
+    "svelte-routing": "^1.6.0",
     "yup": "0.32.11"
   }
 }

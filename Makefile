@@ -1,7 +1,7 @@
 BINARY_NAME=hpfr-shortener
-
 GOCOVER=go tool cover
 
+.PHONY: all
 build:
 	npm run --prefix ui build
 	GOARCH=amd64 GOOS=linux go build -o ./build/${BINARY_NAME} .
@@ -17,24 +17,25 @@ clean:
 	rm -rf ./build
 	rm -rf ./ui/dist
 
-test: test-go test-svelte
+watch-go:
+	gow run .
+
+watch-web:
+	npm run --prefix ui dev
+
+test: test-go test-web
 
 test-go:
 	gotestsum -f testname -- -tags=test -coverprofile=coverage.txt -race -covermode=atomic ./...
 
-test-svelte:
+test-web:
 	npm run --prefix ui test
 
-watch:
-	make -j2 watch-go watch-svelte
+test-watch:
+	$(MAKE) -j2 test-watch-go test-watch-web
 
-watch-go:
+test-watch-go:
 	gotestsum --watch -f testname -- -tags=test -coverprofile=coverage.txt -race -covermode=atomic ./...
 
-watch-svelte:
+test-watch-web:
 	npm run --prefix ui test:watch
-
-cover:
-	gotestsum -f testname -- -tags=test ./... -coverprofile=coverage.out
-	$(GOCOVER) -func=coverage.out
-	$(GOCOVER) -html=coverage.out -o coverage.html

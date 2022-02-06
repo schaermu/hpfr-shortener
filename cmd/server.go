@@ -34,12 +34,24 @@ func NewServer(embedFS http.FileSystem, log *logrus.Logger) (server *Server, err
 	e := echo.New()
 
 	// setup middleware
-	e.Use(middleware.Logger())
+	e.Use(middleware.RequestID())
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Format:           "time=${time_custom}, id=${id}, method=${method}, uri=${uri}, status=${status},${error} lat=${latency_human}, bytes_out=${bytes_out}\n",
+		CustomTimeFormat: "2006-01-02 15:04:05",
+	}))
 	e.Use(middleware.Recover())
-	e.Use(middleware.CORS())
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOriginFunc: func(origin string) (bool, error) {
+			if len(config.BaseURL) > 0 && origin == config.BaseURL {
+				return true, nil
+			}
+			return origin == "http://localhost", nil
+		},
+		AllowMethods: []string{"GET", "POST"},
+	}))
 	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
 		Filesystem: embedFS,
-		HTML5:      true,
+		HTML5:      false,
 	}))
 
 	// register custom validator

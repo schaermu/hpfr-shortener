@@ -6,6 +6,8 @@ import (
 	"embed"
 	"io/fs"
 	"net/http"
+
+	"github.com/schaermu/hpfr-shortener/internal/handlers"
 )
 
 //go:embed ui/dist/*
@@ -17,5 +19,8 @@ func getFileSystem() http.FileSystem {
 		panic(err)
 	}
 
-	return http.FS(fsys)
+	var fs = http.FS(fsys)
+	handlers.StaticFS = fs
+
+	return fs
 }

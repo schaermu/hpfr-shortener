@@ -3,6 +3,7 @@
 package main
 
 import (
+	"github.com/schaermu/hpfr-shortener/internal/handlers"
 	"net/http"
 	"testing/fstest"
 )
@@ -11,5 +12,9 @@ func getFileSystem() http.FileSystem {
 	fsys := fstest.MapFS{
 		"index.html": {},
 	}
-	return http.FS(fsys)
+
+	var fs = http.FS(fsys)
+	handlers.StaticFS = fs
+
+	return handlers.StaticFS
 }

@@ -6,6 +6,7 @@ require github.com/labstack/echo/v4 v4.6.3
 
 require (
 	github.com/go-playground/validator/v10 v10.10.0
+	github.com/ip2location/ip2location-go v8.3.0+incompatible
 	github.com/joho/godotenv v1.4.0
 	github.com/labstack/gommon v0.3.1
 	github.com/matoous/go-nanoid/v2 v2.0.0
@@ -43,6 +44,6 @@ require (
 	golang.org/x/sys v0.0.0-20211210111614-af8b64212486 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20201208040808-7e3f01d25324 // indirect
-	gopkg.in/yaml.v2 v2.2.2 // indirect
+	gopkg.in/yaml.v2 v2.2.8 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )

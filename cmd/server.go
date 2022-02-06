@@ -29,7 +29,7 @@ func NewServer(embedFS http.FileSystem, log *logrus.Logger) (server *Server, err
 	if err != nil {
 		return nil, err
 	}
-	urlRepo := repositories.NewURLRepository(ds)
+	urlRepo := repositories.NewURLRepository(ds, log)
 
 	e := echo.New()
 

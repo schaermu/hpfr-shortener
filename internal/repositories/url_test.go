@@ -22,6 +22,7 @@ type URLRepositoryTestSuite struct {
 	suite.Suite
 	mongoServer *memongo.Server
 	store       *data.MongoDatastore
+	repo        *URLRepository
 }
 
 func (suite *URLRepositoryTestSuite) SetupSuite() {
@@ -39,6 +40,7 @@ func (suite *URLRepositoryTestSuite) SetupSuite() {
 
 	suite.store, err = data.NewDatastore(mongoServer.URI(), memongo.RandomDatabase(), logger)
 	suite.mongoServer = mongoServer
+	suite.repo = NewURLRepository(suite.store, logger)
 }
 
 func (suite *URLRepositoryTestSuite) TearDownSuite() {
@@ -87,10 +89,9 @@ func (suite *URLRepositoryTestSuite) TestNewShortURL() {
 func (suite *URLRepositoryTestSuite) testFindByID_NoID() {
 	// arrange
 	var id = ""
-	r := NewURLRepository(suite.store)
 
 	// act
-	_, err := r.FindByID(id)
+	_, err := suite.repo.FindByID(id)
 
 	// assert
 	assert.Error(suite.T(), err)
@@ -103,7 +104,6 @@ func (suite *URLRepositoryTestSuite) testFindByID_ValidID() {
 		code = "foobar"
 	)
 
-	r := NewURLRepository(suite.store)
 	var shortURL = domain.ShortURL{
 		CreatedAt: time.Now(),
 		TargetURL: url,
@@ -114,7 +114,7 @@ func (suite *URLRepositoryTestSuite) testFindByID_ValidID() {
 	var insertedID = res.InsertedID.(primitive.ObjectID).Hex()
 
 	// act
-	foundShortURL, err := r.FindByID(insertedID)
+	foundShortURL, err := suite.repo.FindByID(insertedID)
 
 	// assert
 	if assert.NoError(suite.T(), err) {
@@ -126,10 +126,9 @@ func (suite *URLRepositoryTestSuite) testFindByID_ValidID() {
 func (suite *URLRepositoryTestSuite) testFindByShortCode_NoCode() {
 	// arrange
 	var code = ""
-	r := NewURLRepository(suite.store)
 
 	// act
-	_, err := r.FindByShortCode(code)
+	_, err := suite.repo.FindByShortCode(code)
 
 	// assert
 	assert.Error(suite.T(), err)
@@ -142,7 +141,6 @@ func (suite *URLRepositoryTestSuite) testFindByShortCode_ValidCode() {
 		code = "foobar"
 	)
 
-	r := NewURLRepository(suite.store)
 	var shortURL = domain.ShortURL{
 		CreatedAt: time.Now(),
 		TargetURL: url,
@@ -153,7 +151,7 @@ func (suite *URLRepositoryTestSuite) testFindByShortCode_ValidCode() {
 	var insertedID = res.InsertedID.(primitive.ObjectID).Hex()
 
 	// act
-	foundShortURL, err := r.FindByShortCode(code)
+	foundShortURL, err := suite.repo.FindByShortCode(code)
 
 	// assert
 	if assert.NoError(suite.T(), err) {
@@ -166,10 +164,9 @@ func (suite *URLRepositoryTestSuite) testFindByShortCode_ValidCode() {
 func (suite *URLRepositoryTestSuite) testNewShortURL_NoURL() {
 	// arrange
 	var url = ""
-	r := NewURLRepository(suite.store)
 
 	// act
-	_, err := r.NewShortURL(url)
+	_, err := suite.repo.NewShortURL(url)
 
 	// assert
 	assert.Error(suite.T(), err)
@@ -178,10 +175,9 @@ func (suite *URLRepositoryTestSuite) testNewShortURL_NoURL() {
 func (suite *URLRepositoryTestSuite) testNewShortURL_InvalidURL() {
 	// arrange
 	var url = "iNvAlId_CrAp"
-	r := NewURLRepository(suite.store)
 
 	// act
-	_, err := r.NewShortURL(url)
+	_, err := suite.repo.NewShortURL(url)
 
 	// assert
 	assert.Error(suite.T(), err)
@@ -190,14 +186,13 @@ func (suite *URLRepositoryTestSuite) testNewShortURL_InvalidURL() {
 func (suite *URLRepositoryTestSuite) testNewShortURL_ValidURL() {
 	// arrange
 	var url = "http://www.foobar.org"
-	r := NewURLRepository(suite.store)
 
 	// act
-	code, err := r.NewShortURL(url)
+	code, err := suite.repo.NewShortURL(url)
 
 	// assert
 	if assert.NoError(suite.T(), err) {
-		shortURL, err := r.FindByShortCode(code)
+		shortURL, err := suite.repo.FindByShortCode(code)
 		assert.NoError(suite.T(), err)
 		assert.Equal(suite.T(), code, shortURL.ShortCode)
 		assert.Equal(suite.T(), url, shortURL.TargetURL)

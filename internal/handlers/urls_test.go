@@ -43,7 +43,7 @@ func (suite *URLHandlerTestSuite) SetupSuite() {
 	}
 	store, err := data.NewDatastore(mongoServer.URI(), memongo.RandomDatabase(), logger)
 	suite.mongoServer = mongoServer
-	suite.repository = repositories.NewURLRepository(store)
+	suite.repository = repositories.NewURLRepository(store, logger)
 
 	// setup echo server
 	suite.echo = echo.New()

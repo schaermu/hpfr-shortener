@@ -6,24 +6,35 @@ import (
 	"net/url"
 	"time"
 
+	ip2location "github.com/ip2location/ip2location-go"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/schaermu/hpfr-shortener/internal/data"
 	"github.com/schaermu/hpfr-shortener/internal/domain"
+	"github.com/sirupsen/logrus"
 	"github.com/ua-parser/uap-go/uaparser"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type URLRepository struct {
-	store *data.MongoDatastore
+	store    *data.MongoDatastore
+	ip2locDB *ip2location.DB
+	logger   *logrus.Logger
 }
 
-func NewURLRepository(store *data.MongoDatastore) *URLRepository {
+func NewURLRepository(store *data.MongoDatastore, logger *logrus.Logger) *URLRepository {
+	var dbPath = "./IP2LOCATION-LITE-DB1.BIN"
+	db, err := ip2location.OpenDB(dbPath)
+	if err != nil {
+		logger.Infof("Could not locate IP2Location database at %q, skipping ip lookups.", dbPath)
+	}
+
 	return &URLRepository{
-		store: store,
+		store:    store,
+		ip2locDB: db,
+		logger:   logger,
 	}
 }
 
@@ -92,9 +103,17 @@ func (r *URLRepository) RecordHit(target domain.ShortURL, c echo.Context) error 
 		OSMinor:   uap.Os.Minor,
 	}
 
+	// try to locate ip address
+	if r.ip2locDB != nil {
+		if res, err := r.ip2locDB.Get_all(c.RealIP()); err == nil {
+			hit.Country = res.Country_long
+			hit.CountryCode = res.Country_short
+		}
+	}
+
 	_, err := r.store.URLCollection.UpdateByID(context.TODO(), target.ID, bson.M{
-		"$push": hit,
-	}, options.Update().SetUpsert(true))
+		"$push": bson.M{"hits": hit},
+	})
 
 	if err != nil {
 		return err

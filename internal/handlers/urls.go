@@ -68,6 +68,8 @@ func (h *URLHandler) Redirect(c echo.Context) (err error) {
 		return h.Statistics(c)
 	}
 
+	defer h.repository.RecordHit(target, c)
+
 	return c.Redirect(http.StatusTemporaryRedirect, target.TargetURL)
 }
 

@@ -105,10 +105,10 @@ func (suite *URLRepositoryTestSuite) testFindByID_ValidID() {
 
 	r := NewURLRepository(suite.store)
 	var shortURL = domain.ShortURL{
-		CreatedAt:     time.Now(),
-		TargetURL:     url,
-		ShortCode:     code,
-		RedirectCount: 0,
+		CreatedAt: time.Now(),
+		TargetURL: url,
+		ShortCode: code,
+		Hits:      []domain.ShortURLHit{},
 	}
 	res, err := suite.store.URLCollection.InsertOne(context.TODO(), shortURL)
 	var insertedID = res.InsertedID.(primitive.ObjectID).Hex()
@@ -144,10 +144,10 @@ func (suite *URLRepositoryTestSuite) testFindByShortCode_ValidCode() {
 
 	r := NewURLRepository(suite.store)
 	var shortURL = domain.ShortURL{
-		CreatedAt:     time.Now(),
-		TargetURL:     url,
-		ShortCode:     code,
-		RedirectCount: 0,
+		CreatedAt: time.Now(),
+		TargetURL: url,
+		ShortCode: code,
+		Hits:      []domain.ShortURLHit{},
 	}
 	res, err := suite.store.URLCollection.InsertOne(context.TODO(), shortURL)
 	var insertedID = res.InsertedID.(primitive.ObjectID).Hex()

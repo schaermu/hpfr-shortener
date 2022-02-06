@@ -6,12 +6,15 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/schaermu/hpfr-shortener/internal/data"
 	"github.com/schaermu/hpfr-shortener/internal/domain"
+	"github.com/ua-parser/uap-go/uaparser"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type URLRepository struct {
@@ -53,10 +56,10 @@ func (r *URLRepository) NewShortURL(uri string) (string, error) {
 	}
 
 	shortURL := domain.ShortURL{
-		CreatedAt:     time.Now(),
-		TargetURL:     uri,
-		ShortCode:     shortID,
-		RedirectCount: 0,
+		CreatedAt: time.Now(),
+		TargetURL: uri,
+		ShortCode: shortID,
+		Hits:      []domain.ShortURLHit{},
 	}
 
 	res, err := r.store.URLCollection.InsertOne(context.TODO(), shortURL)
@@ -71,6 +74,33 @@ func (r *URLRepository) NewShortURL(uri string) (string, error) {
 
 	log.Infof("Created new short url with code %v", shortURL.ShortCode)
 	return shortURL.ShortCode, nil
+}
+
+func (r *URLRepository) RecordHit(target domain.ShortURL, c echo.Context) error {
+
+	// parse user agent
+	parser := uaparser.NewFromSaved()
+	uap := parser.Parse(c.Request().UserAgent())
+
+	hit := domain.ShortURLHit{
+		CreatedAt: time.Now(),
+		UAFamily:  uap.UserAgent.Family,
+		UAMajor:   uap.UserAgent.Major,
+		UAMinor:   uap.UserAgent.Minor,
+		OS:        uap.Os.Family,
+		OSMajor:   uap.Os.Major,
+		OSMinor:   uap.Os.Minor,
+	}
+
+	_, err := r.store.URLCollection.UpdateByID(context.TODO(), target.ID, bson.M{
+		"$push": hit,
+	}, options.Update().SetUpsert(true))
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *URLRepository) getUniqueID() (string, error) {

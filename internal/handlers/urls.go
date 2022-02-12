@@ -19,7 +19,7 @@ type URLShortenResponse struct {
 
 type URLStatisticsResponse struct {
 	HitCount    int64     `json:"hits"`
-	HitTimeData [][]int64 `json:"hitTimeData`
+	HitTimeData [][]int64 `json:"hitTimeData"`
 }
 
 type URLHandler struct {
@@ -110,5 +110,6 @@ func (h *URLHandler) Statistics(c echo.Context) (err error) {
 
 	return c.JSON(http.StatusFound, &URLStatisticsResponse{
 		HitTimeData: hitTimeData,
+		HitCount:    stats.TotalCount,
 	})
 }

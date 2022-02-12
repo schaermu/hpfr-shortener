@@ -29,13 +29,19 @@ type FindOptions struct {
 	IncludeHits bool
 }
 
+type TotalCount struct {
+	Id    primitive.ObjectID `bson:"_id,omitempty"`
+	Count int64              `bson:"count,omitempty"`
+}
+
 type TimeBasedStatistic struct {
 	Date  time.Time `bson:"_id,omitempty"`
 	Value int64     `bson:"value,omitempty"`
 }
 
 type StatisticsResult struct {
-	Hits []TimeBasedStatistic
+	TotalCount int64
+	Hits       []TimeBasedStatistic
 }
 
 func NewURLRepository(store *data.MongoDatastore, logger *logrus.Logger) *URLRepository {
@@ -109,10 +115,32 @@ func (r *URLRepository) getHitsTimeSeries(code string) (result []TimeBasedStatis
 	return
 }
 
+func (r *URLRepository) getHitCount(code string) (result int64, err error) {
+	matchStage := bson.M{"$match": bson.M{"short_code": code}}
+	projectStage := bson.M{"$project": bson.M{"count": bson.M{"$size": "$hits"}}}
+
+	hitCount, err := r.store.URLCollection.Aggregate(context.TODO(), []bson.M{matchStage, projectStage})
+	if err != nil {
+		return
+	}
+
+	hitCount.Next(context.TODO())
+	var res = TotalCount{}
+	if err = hitCount.Decode(&res); err != nil {
+		return
+	}
+	result = res.Count
+	return
+}
+
 func (r *URLRepository) GetStatistics(code string) (result StatisticsResult, err error) {
 	result = StatisticsResult{}
 	if timeSeriesHits, err := r.getHitsTimeSeries(code); err == nil {
 		result.Hits = timeSeriesHits
+	}
+
+	if totalCount, err := r.getHitCount(code); err == nil {
+		result.TotalCount = totalCount
 	}
 
 	return

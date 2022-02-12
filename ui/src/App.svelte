@@ -1,18 +1,10 @@
 <script lang="ts">
   import { Router, Route } from 'svelte-routing';
   import New from './routes/New.svelte';
-  import Stats from './routes/Stats.svelte'
+  import Stats from './routes/Stats.svelte';
 
   export let url = '';
 </script>
-
-<style>
-footer {
-  margin-top: 5rem;
-  text-align: center;
-  font-size: 0.9rem;
-}
-</style>
 
 <header class="container">
   <hgroup>
@@ -21,11 +13,19 @@ footer {
   </hgroup>
 </header>
 <main class="container">
-  <Router url="{url}">
+  <Router {url}>
     <Route path="/"><New /></Route>
-    <Route path="/:code" component={Stats}></Route>
+    <Route path="/:code" component={Stats} />
   </Router>
 </main>
 <footer class="container">
   <small>made with ❤️ by schaermu &dash; &copy; 2022</small>
 </footer>
+
+<style>
+  footer {
+    margin-top: 5rem;
+    text-align: center;
+    font-size: 0.9rem;
+  }
+</style>

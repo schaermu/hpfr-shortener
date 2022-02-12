@@ -100,9 +100,10 @@ func (r *URLRepository) getHitsTimeSeries(code string) (result []TimeBasedStatis
 		{Key: "_id", Value: "$hitDate"},
 		{Key: "value", Value: bson.M{"$sum": 1}},
 	}}
+	orderStage := bson.M{"$sort": bson.M{"_id": -1}}
 
 	hitsByDate, err := r.store.URLCollection.Aggregate(context.TODO(), []bson.M{
-		unwindStage, matchStage, addFieldsStage, groupStage,
+		unwindStage, matchStage, addFieldsStage, groupStage, orderStage,
 	})
 	if err != nil {
 		return

@@ -1,27 +1,82 @@
 <script lang="ts">
-    import { chart } from '../lib/apex-wrapper'
+  import ApexCharts from 'apexcharts';
+  import { onMount } from 'svelte';
+  import ApiClient from '../lib/api';
 
-    export let code: string;
-    export let location;
-    
-    let options = {
-        chart: {
-        type: "line",
+  window['ApexCharts'] = ApexCharts;
+
+  export let code: string;
+
+  let chartDom;
+
+  const client = new ApiClient();
+  let options = {
+    chart: {
+      type: 'area',
+      stacked: false,
+      height: 350,
+      zoom: {
+        type: 'x',
+        enabled: true,
+        autoScaleYaxis: true,
+      },
+      toolbar: {
+        autoSelected: 'zoom',
+      },
+    },
+    title: {
+      text: 'Access Statistics',
+      align: 'left',
+    },
+    fill: {
+      type: 'gradient',
+      gradient: {
+        shadeIntensity: 1,
+        inverseColors: false,
+        opacityFrom: 0.5,
+        opacityTo: 0,
+        stops: [0, 90, 100],
+      },
+    },
+    xaxis: {
+      type: 'datetime',
+    },
+    tooltip: {
+      shared: false,
+      y: {
+        formatter: function (val) {
+          return val.toFixed(0);
         },
-        series: [
-        {
-            name: "hits",
-            data: [30, 40, 35, 50, 49, 60, 70, 91, 125],
-        },
+      },
+    },
+    series: [],
+    noData: {
+      text: 'Loading...',
+    },
+  };
+
+  onMount(() => {
+    let chart = new ApexCharts(chartDom, options);
+    chart.render();
+
+    client.getStatistics(code.replace('+', '')).then((stats) => {
+      chart.updateSeries(
+        [
+          {
+            name: 'Hits',
+            data: stats.hitTimeData,
+          },
         ],
-        xaxis: {
-        categories: [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999],
-        },
-    };
+        true
+      );
+    });
+  });
 </script>
 
 <div>
-    <div use:chart={options} />
+  <div bind:this={chartDom} id="chart" />
 </div>
 
-This site or product includes IP2Location LITE data available from <a href="https://lite.ip2location.com">https://lite.ip2location.com</a>.
+This site or product includes IP2Location LITE data available from<a
+  href="https://lite.ip2location.com">https://lite.ip2location.com</a
+>.

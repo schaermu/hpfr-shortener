@@ -18,7 +18,8 @@ type URLShortenResponse struct {
 }
 
 type URLStatisticsResponse struct {
-	HitCount int `json:"hits"`
+	HitCount    int64     `json:"hits"`
+	HitTimeData [][]int64 `json:"hitTimeData`
 }
 
 type URLHandler struct {
@@ -88,7 +89,26 @@ func (h *URLHandler) RenderStatistics(c echo.Context) (err error) {
 }
 
 func (h *URLHandler) Statistics(c echo.Context) (err error) {
-	//code := c.QueryParam("code")
+	code := c.QueryParam("code")
+	if len(code) == 0 {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
 
-	return c.JSON(http.StatusFound, &URLStatisticsResponse{})
+	// create statistics
+	stats, err := h.repository.GetStatistics(code)
+	if err != nil {
+		return echo.NewHTTPError(500, err)
+	}
+
+	var hitTimeData = [][]int64{}
+	for i := 0; i < len(stats.Hits); i++ {
+		hitTimeData = append(hitTimeData, []int64{
+			stats.Hits[i].Date.UnixMilli(),
+			stats.Hits[i].Value,
+		})
+	}
+
+	return c.JSON(http.StatusFound, &URLStatisticsResponse{
+		HitTimeData: hitTimeData,
+	})
 }

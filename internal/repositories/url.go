@@ -29,6 +29,15 @@ type FindOptions struct {
 	IncludeHits bool
 }
 
+type TimeBasedStatistic struct {
+	Date  time.Time `bson:"_id,omitempty"`
+	Value int64     `bson:"value,omitempty"`
+}
+
+type StatisticsResult struct {
+	Hits []TimeBasedStatistic
+}
+
 func NewURLRepository(store *data.MongoDatastore, logger *logrus.Logger) *URLRepository {
 	var dbPath = "./IP2LOCATION-LITE-DB1.BIN"
 	db, err := ip2location.OpenDB(dbPath)
@@ -66,6 +75,46 @@ func (r *URLRepository) FindByShortCodeWithOptions(code string, opts *FindOption
 	err = r.store.URLCollection.FindOne(context.TODO(),
 		bson.M{"short_code": code},
 		options.FindOne().SetProjection(bson.M{"hits": utils.BTOI(opts.IncludeHits)})).Decode(&shortURL)
+	return
+}
+
+func (r *URLRepository) getHitsTimeSeries(code string) (result []TimeBasedStatistic, err error) {
+	matchStage := bson.M{"$match": bson.M{"short_code": code}}
+	unwindStage := bson.M{"$unwind": "$hits"}
+	addFieldsStage := bson.M{"$addFields": bson.M{
+		"hitDate": bson.M{
+			"$dateFromParts": bson.M{
+				"year":  bson.M{"$year": "$hits.created_at"},
+				"month": bson.M{"$month": "$hits.created_at"},
+				"day":   bson.M{"$dayOfMonth": "$hits.created_at"},
+			},
+		},
+	}}
+	groupStage := bson.M{"$group": bson.D{
+		{Key: "_id", Value: "$hitDate"},
+		{Key: "value", Value: bson.M{"$sum": 1}},
+	}}
+
+	hitsByDate, err := r.store.URLCollection.Aggregate(context.TODO(), []bson.M{
+		unwindStage, matchStage, addFieldsStage, groupStage,
+	})
+	if err != nil {
+		return
+	}
+
+	var hits []TimeBasedStatistic
+	if err = hitsByDate.All(context.TODO(), &hits); err == nil {
+		result = hits
+	}
+	return
+}
+
+func (r *URLRepository) GetStatistics(code string) (result StatisticsResult, err error) {
+	result = StatisticsResult{}
+	if timeSeriesHits, err := r.getHitsTimeSeries(code); err == nil {
+		result.Hits = timeSeriesHits
+	}
+
 	return
 }
 

@@ -35,6 +35,7 @@
     "vite": "2.7.13"
   },
   "dependencies": {
+    "apexcharts": "^3.33.1",
     "svelte-forms-lib": "2.0.1",
     "svelte-routing": "^1.6.0",
     "yup": "0.32.11"

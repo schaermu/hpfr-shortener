@@ -2,7 +2,7 @@ module github.com/schaermu/hpfr-shortener
 
 go 1.17
 
-require github.com/labstack/echo/v4 v4.7.2
+require github.com/labstack/echo/v4 v4.9.0
 
 require (
 	github.com/go-playground/validator/v10 v10.10.0

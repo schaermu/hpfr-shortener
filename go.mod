@@ -5,7 +5,7 @@ go 1.17
 require github.com/labstack/echo/v4 v4.7.2
 
 require (
-	github.com/go-playground/validator/v10 v10.10.0
+	github.com/go-playground/validator/v10 v10.22.1
 	github.com/joho/godotenv v1.4.0
 	github.com/labstack/gommon v0.3.1
 	github.com/matoous/go-nanoid/v2 v2.0.0
